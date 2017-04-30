@@ -1,0 +1,246 @@
+/*function showList(url,$http,$scope) {
+  
+    $scope.entryLimit = 10;
+
+    $http({
+     method:'post',        
+      url:url,              
+      params: { curr_page : $scope.currentPage,
+                limit : $scope.entryLimit}
+    }).success(function(data){            
+        $scope.list = data.data;
+        $scope.currentPage = data.curr_page; //current page                
+        $scope.filteredItems = data.total; //Initially for no filter         
+        $scope.totalItems = data.total;
+        $scope.hours_sum = data.hours_sum;
+
+    });
+}*/
+
+
+
+function showList(url,params,$http,$scope) {
+  
+    $scope.entryLimit = 10;
+    params['limit'] = 10;
+
+    $http({
+     method:'post',        
+      url:url,              
+      params: params
+    }).success(function(data){            
+        $scope.list = data.data;
+        $scope.currentPage = data.curr_page; //current page                
+        $scope.filteredItems = data.total; //Initially for no filter         
+        $scope.totalItems = data.total;
+        $scope.hours_sum = data.hours_sum;
+        $scope.overtime_sum = data.overtime_sum;
+        $scope.approved_overtime_sum = data.approved_overtime_sum;
+        $scope.days_sum = data.days_sum;
+    });
+}
+
+function shiftServices($scope) {
+
+  if ($scope.services.length < 0) {
+    $scope.services = [    
+    ];     
+  }
+	
+
+  $scope.checkName = function(data, id) {
+    if (id === 2 && data !== 'awesome') {
+      return "Username 2 should be `awesome`";
+    }
+  };
+
+  $scope.saveService = function(data, id) {
+    //$scope.user not updated yet
+    
+    angular.extend(data, {id: id});    
+    //return $http.post('/saveUser', data);
+  };
+
+  // remove service
+  $scope.removeService = function(index) {
+    $scope.services.splice(index, 1);
+  };
+
+  // add service
+  $scope.addService = function() {    
+    $scope.inserted = {
+      id: $scope.services.length+1,
+      customer: null,
+      ticket_num: null,
+      description: null 
+    };
+    $scope.services.push($scope.inserted);
+  };
+}
+
+function toObject(arr) {
+  var rv = {};
+  for (var i = 0; i < arr.length; ++i)
+    if (arr[i] !== undefined) rv[i] = arr[i];
+  return rv;
+}
+
+function diff(start, end) {
+    start = start.split(":");
+    end = end.split(":");
+    var startDate = new Date(0, 0, 0, start[0], start[1], 0);
+    var endDate = new Date(0, 0, 0, end[0], end[1], 0);
+    var diff = endDate.getTime() - startDate.getTime();
+    var hours = Math.floor(diff / 1000 / 60 / 60);
+    diff -= hours * 1000 * 60 * 60;
+    var minutes = Math.floor(diff / 1000 / 60);
+
+    // If using time pickers with 24 hours format, add the below line get exact hours
+    if (hours < 0)
+       hours = hours + 24;
+
+    return (hours <= 9 ? "0" : "") + hours + ":" + (minutes <= 9 ? "0" : "") + minutes + ":00";
+}
+
+function covertDate (date,time) { 
+  
+  return date.getFullYear()+'-'+(date.getMonth()+1)+'-'+date.getDate() + ' ' + time.getHours() + ':'+time.getMinutes();
+}
+
+function getAccounts($http,$scope) {     
+    $http.get('main/getAccounts').success(function(data){                   
+        $scope.accounts = data;        
+    });    
+}
+
+
+
+function displayDate($scope) {
+   $scope.today = function() {
+    $scope.dt = new Date();
+  };
+  $scope.today();
+
+  $scope.clear = function () {
+    $scope.dt = null;
+  };
+
+  // Disable weekend selection
+  $scope.disabled = function(date, mode) {
+    return ( mode === 'day' &&date.getDay() === 5  );
+  };
+
+  $scope.toggleMin = function() {
+    $scope.minDate = $scope.minDate ? null : new Date();
+  };
+  $scope.toggleMin();
+
+  $scope.openPersian = function($event) {
+    $event.preventDefault();
+    $event.stopPropagation();
+
+    $scope.persianIsOpen = true;
+ 
+  };
+ 
+  $scope.openPersianStartDate = function($event) {
+    $event.preventDefault();
+    $event.stopPropagation();
+
+    $scope.persianIsOpenStartDate = true;
+  };
+
+  $scope.openPersianEndDate = function($event) {
+    $event.preventDefault();
+    $event.stopPropagation();
+    
+    $scope.persianIsOpenEndDate = true;
+  };
+
+
+  $scope.dateOptions = {
+    formatYear: 'yy',
+    startingDay: 6
+  };
+
+  $scope.initDate = new Date('2016-15-20');
+  $scope.formats = ['dd-MMMM-yyyy', 'yyyy/MM/dd', 'dd.MM.yyyy', 'shortDate'];
+  $scope.format = $scope.formats[1];
+
+}
+
+
+function displayTime($scope) {
+//========time
+    $scope.mytime = new Date();
+    $scope.start_time = new Date();
+    $scope.end_time = new Date();
+
+    $scope.hstep = 1;
+    $scope.mstep = 15;
+
+    $scope.options = {
+      hstep: [1, 2, 3],
+      mstep: [1, 5, 10, 15, 25, 30]
+    };
+
+    $scope.ismeridian = false;
+
+    $scope.update = function() {
+      var d = new Date();
+      d.setHours( 14 );
+      d.setMinutes( 0 );
+      $scope.mytime = d;
+    };
+
+    $scope.changed = function () {
+    };
+
+    $scope.clear = function() {
+      $scope.mytime = null;
+    };
+
+}
+
+
+
+
+
+app.controller('changePasswordCrtl', function ($scope, $http,$location, $timeout,$modal,$q) {
+  $scope.submitForm = function(isValid) {     
+    if (isValid) {  
+        $http({
+         method:'post',        
+          url:'users/updatePassword',        
+          headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+          params: {        
+                    password : $scope.user.password_verify,                                        
+                  }
+        }).success(function(result){            
+            $scope.message = result;
+        });
+    }
+  }
+
+  });
+
+app.controller('headerCrtl', function ($scope, $http,$location, $timeout,$modal) {
+    $scope.data = {
+            show: true,
+            hide: false
+        };
+    $scope.showImg = function () {      
+      $scope.data = {
+        hide:true,
+      }
+    }
+    $scope.hideImg = function() {
+      $scope.data = {
+        show:true,
+      }
+    }
+
+  });
+
+
+
